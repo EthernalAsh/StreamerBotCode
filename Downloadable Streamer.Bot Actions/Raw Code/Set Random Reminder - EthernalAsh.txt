@@ -1,0 +1,82 @@
+/* Copyright (C) 2023 EthernalAsh - Attribution 4.0 International (CC BY 4.0)
+ * You are free to share and adapt the current material.
+ * Under the following terms, you must give appropiate credit,
+ * provide a link to the license, and indicate if changes were made.
+ *
+ * For more information about the license go to:
+ * https://creativecommons.org/licenses/by/4.0/
+ * 
+ * 
+ * Crediting can be done by sharing a direct link to the github repository:
+ * https://github.com/EthernalAsh/StreamerBotCode
+ */
+
+using System;
+
+public class CPHInline
+{
+    public bool Execute()
+    {
+		// All the sources that need to be affected, {"SceneName", "SourceName"}
+        string[, ] sourceList = new string[,]
+		{{"Facecam_Only", "Big_Screen_Reminder_Text_Source"},
+		{"Game_Facecam", "Small_Screen_Reminder_Text_Source"},
+		{"Game_Fullscreen", "Camera_Small_Reminder_Text_Source"}};
+
+		// A list of all possible reminders, note that counting starts with 0 and not 1
+        string[] reminders = new string[6];
+        reminders[0] = "There are new commands you can use,\ntype !commands for the entire list.";
+        reminders[1] = "Make sure to follow me with the button below,\nand turn the notifications on.";
+        reminders[2] = "Join my discord to meet great people,\nand receive updates about the stream.";
+        reminders[3] = "Type !party to get a party started.";
+        reminders[4] = "The true nuke can be activated multiple times in a stream,\ncheck its description to see how.";
+		reminders[5] = "Ads run 3 minutes every hour, subscribing removes them and supports me!";
+
+        string targetText;		// Temporary text from the reminders list
+        string newString = "";	// The writen down text
+
+		// Get a random line of text and place this in targetText
+        Random rnd = new Random();
+        targetText = reminders[rnd.Next(0, reminders.Length)];
+
+		// Start playing a sound on every scene from the sourceList
+		// Replace the "Computer_Keyboard_Source" with the name of your audio source
+        for (int y = 0; y < sourceList.Length / 2; y++)
+        {
+            CPH.ObsMediaRestart(sourceList[y, 0], "Computer_Keyboard_Source");
+        }
+		
+		// Replace the background of the stream to keep it intresting.
+        CPH.ObsSetImageSourceFile("Background_Simple_shapes", "Background_Simple_Shapes_Source", "C:/Users/kevin/Documents/EthernalAshOverlay/Background/Simple_Shapes_" + rnd.Next(1, 4) + ".png");
+        
+		// For every character in the target text
+		for (int c = 0; c < targetText.Length; c++)
+        {
+			// Add the character to the end of newString
+            newString = newString + targetText[c];
+            
+			// Loop through every source from the SourceList and update the OBS GDI text to newString
+			int x = 0;
+            while (x < sourceList.Length / 2)
+            {
+                CPH.ObsSetGdiText(sourceList[x, 0], sourceList[x, 1], newString);
+                x++;
+            }
+			
+			// When the character is a space wait longer 100ms-200ms, when any other character its 20ms-40ms.
+            if (targetText[c].ToString() == " ")
+                CPH.Wait(rnd.Next(100, 200));
+            else
+                CPH.Wait(rnd.Next(20, 40));
+        }
+		
+		// Start and stop playing sounds on every scene from sourceList
+		// Replace the "Typewriter_Ding_Source" or "Computer_Keyboard_Source" with the name of your audio source
+        for (int y = 0; y < sourceList.Length / 2; y++)
+        {
+            CPH.ObsMediaRestart(sourceList[y, 0], "Typewriter_Ding_Source");	// Restarts the sound
+            CPH.ObsMediaStop(sourceList[y, 0], "Computer_Keyboard_Source");		// Stops the sound
+        }
+        return true;
+    }
+}
